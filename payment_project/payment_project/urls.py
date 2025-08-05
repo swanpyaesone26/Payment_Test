@@ -25,6 +25,6 @@ urlpatterns = [
     path('create-checkout-session/', CreateCheckoutSessionView.as_view(), name='create_checkout_session'),
     path('payment/success/', success_view, name='payment_success'),
     path('payment/failure/', failure_view, name='payment_failure'), # ----added
-    path('payment/webhook/', stripe_webhook, name='stripe_webhook'),  # Stripe webhook endpoint
+    path('webhook/', stripe_webhook, name='stripe_webhook'),  # Stripe webhook endpoint
     path('payment/', include('payments.urls')),  # Include django-payments URLs
 ]
