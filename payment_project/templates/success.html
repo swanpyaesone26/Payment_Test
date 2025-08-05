@@ -43,19 +43,56 @@
             <div class="col-lg-6 col-md-8">
                 <div class="success-container">
                     <div class="success-header">
-                        <h1><i class="fas fa-check-circle me-2"></i>Payment Successful!</h1>
-                        <p class="mb-0">Your payment has been processed successfully</p>
+                        {% if payment_confirmed %}
+                            <h1><i class="fas fa-check-circle me-2"></i>Payment Confirmed!</h1>
+                            <p class="mb-0">Your payment has been confirmed and processed successfully</p>
+                        {% elif payment_pending %}
+                            <h1><i class="fas fa-clock me-2"></i>Payment Processing</h1>
+                            <p class="mb-0">Your payment is being processed. Please wait a moment...</p>
+                        {% else %}
+                            <h1><i class="fas fa-info-circle me-2"></i>Payment Status</h1>
+                            <p class="mb-0">Checking your payment status...</p>
+                        {% endif %}
                     </div>
                     
                     <div class="p-4 text-center">
                         <div class="mb-4">
-                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            {% if payment_confirmed %}
+                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            {% elif payment_pending %}
+                                <i class="fas fa-clock text-warning" style="font-size: 4rem;"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-info" style="font-size: 4rem;"></i>
+                            {% endif %}
                         </div>
-                        <h3 class="text-success mb-3">Thank You!</h3>
-                        <p class="text-muted mb-4">Your payment has been completed successfully. You will receive a confirmation email shortly.</p>
+                        
+                        {% if payment_confirmed %}
+                            <h3 class="text-success mb-3">Payment Confirmed!</h3>
+                            <p class="text-muted mb-4">Your payment has been confirmed and processed successfully. You will receive a confirmation email shortly.</p>
+                            {% if payment %}
+                                <div class="alert alert-success">
+                                    <strong>Payment Details:</strong><br>
+                                    Amount: ${{ payment.total }}<br>
+                                    Status: {{ payment.status|title }}<br>
+                                    {% if payment.webhook_received_at %}
+                                        Confirmed at: {{ payment.webhook_received_at|date:"M d, Y H:i" }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% elif payment_pending %}
+                            <h3 class="text-warning mb-3">Processing Payment</h3>
+                            <p class="text-muted mb-4">Your payment is currently being processed. This usually takes a few seconds. Please wait while we confirm your payment.</p>
+                            <div class="alert alert-warning">
+                                <strong>Payment Status:</strong> Pending<br>
+                                <small>We're waiting for payment confirmation from our payment processor.</small>
+                            </div>
+                        {% else %}
+                            <h3 class="text-info mb-3">Payment Status Unknown</h3>
+                            <p class="text-muted mb-4">We're unable to determine your payment status at this time. Please contact support if you have any questions.</p>
+                        {% endif %}
                         
                         <div class="d-grid gap-2">
-                            <a href="{% url 'payment_form' %}" class="btn btn-primary">
+                            <a href="{% url 'stripe_checkout' %}" class="btn btn-primary">
                                 <i class="fas fa-credit-card me-2"></i>Make Another Payment
                             </a>
                         </div>

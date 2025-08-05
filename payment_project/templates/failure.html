@@ -51,22 +51,65 @@
             <div class="col-lg-6 col-md-8">
                 <div class="failure-container">
                     <div class="failure-header">
-                        <h1><i class="fas fa-times-circle me-2"></i>Payment Failed</h1>
-                        <p class="mb-0">Your payment could not be processed</p>
+                        {% if payment_failed %}
+                            <h1><i class="fas fa-times-circle me-2"></i>Payment Failed</h1>
+                            <p class="mb-0">Your payment could not be processed</p>
+                        {% elif payment_expired %}
+                            <h1><i class="fas fa-clock me-2"></i>Payment Expired</h1>
+                            <p class="mb-0">Your payment session has expired</p>
+                        {% else %}
+                            <h1><i class="fas fa-exclamation-triangle me-2"></i>Payment Issue</h1>
+                            <p class="mb-0">There was an issue with your payment</p>
+                        {% endif %}
                     </div>
                     
                     <div class="p-4 text-center">
                         <div class="mb-4">
-                            <i class="fas fa-times-circle text-danger" style="font-size: 4rem;"></i>
+                            {% if payment_failed %}
+                                <i class="fas fa-times-circle text-danger" style="font-size: 4rem;"></i>
+                            {% elif payment_expired %}
+                                <i class="fas fa-clock text-warning" style="font-size: 4rem;"></i>
+                            {% else %}
+                                <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                            {% endif %}
                         </div>
-                        <h3 class="text-danger mb-3">Payment Unsuccessful</h3>
-                        <p class="text-muted mb-4">We're sorry, but your payment could not be processed. Please check your payment details and try again.</p>
+                        
+                        {% if payment_failed %}
+                            <h3 class="text-danger mb-3">Payment Failed</h3>
+                            <p class="text-muted mb-4">We're sorry, but your payment could not be processed. Please check your payment details and try again.</p>
+                            {% if payment %}
+                                <div class="alert alert-danger">
+                                    <strong>Payment Details:</strong><br>
+                                    Amount: ${{ payment.total }}<br>
+                                    Status: {{ payment.status|title }}<br>
+                                    {% if payment.webhook_received_at %}
+                                        Failed at: {{ payment.webhook_received_at|date:"M d, Y H:i" }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% elif payment_expired %}
+                            <h3 class="text-warning mb-3">Payment Expired</h3>
+                            <p class="text-muted mb-4">Your payment session has expired. This can happen if you took too long to complete the payment or if there was a technical issue.</p>
+                            {% if payment %}
+                                <div class="alert alert-warning">
+                                    <strong>Payment Details:</strong><br>
+                                    Amount: ${{ payment.total }}<br>
+                                    Status: {{ payment.status|title }}<br>
+                                    {% if payment.webhook_received_at %}
+                                        Expired at: {{ payment.webhook_received_at|date:"M d, Y H:i" }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <h3 class="text-warning mb-3">Payment Issue</h3>
+                            <p class="text-muted mb-4">There was an issue with your payment. Please try again or contact support if the problem persists.</p>
+                        {% endif %}
                         
                         <div class="d-grid gap-2">
-                            <a href="{% url 'payment_form' %}" class="btn btn-primary">
+                            <a href="{% url 'stripe_checkout' %}" class="btn btn-primary">
                                 <i class="fas fa-credit-card me-2"></i>Try Again
                             </a>
-                            <a href="{% url 'payment_form' %}" class="btn btn-outline-danger">
+                            <a href="{% url 'stripe_checkout' %}" class="btn btn-outline-danger">
                                 <i class="fas fa-home me-2"></i>Back to Home
                             </a>
                         </div>
